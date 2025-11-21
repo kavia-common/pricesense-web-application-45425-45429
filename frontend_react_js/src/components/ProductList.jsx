@@ -19,6 +19,7 @@ function percentChange(current, last) {
  * - products: Array<{id,name,url,current_price,last_price}>
  * - onSelect(product): function invoked when a row is clicked
  * - onDelete(product): function invoked when remove button is clicked
+ *   Note: parent must prevent row navigation and handle optimistic state update.
  */
 export default function ProductList({
   loading,

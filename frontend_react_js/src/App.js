@@ -139,14 +139,16 @@ function App() {
       setSelected(null);
     }
     try {
-      await deleteProduct(product.id); // expects 204
+      await deleteProduct(product.id); // handle 204 or 200
       setToast({ type: "success", message: "Product removed." });
     } catch (e) {
       // revert on failure
       setProducts(prev);
       setToast({
         type: "error",
-        message: e?.message || "Failed to remove product",
+        message:
+          e?.message ||
+          "Failed to remove product. Please check your network or try again.",
       });
     } finally {
       setTimeout(() => setToast(null), 2500);

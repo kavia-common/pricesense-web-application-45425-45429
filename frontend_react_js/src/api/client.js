@@ -126,7 +126,25 @@ export async function deleteProduct(productId) {
   if (productId == null) {
     throw new Error("productId is required");
   }
-  // Expect 204 No Content; no body parsing
-  await api.delete(`/products/${productId}`);
-  return true;
+  // Accept both 204 No Content (preferred) and 200 OK with or without body.
+  // Some backends might return 200 and a JSON confirmation; normalize to success boolean.
+  try {
+    const res = await api.delete(`/products/${productId}`);
+    // If axios doesn't throw, request reached server. Validate status class.
+    if (res && (res.status === 204 || res.status === 200)) {
+      return true;
+    }
+    // Fallback: treat any 2xx as success
+    if (res && String(res.status).startsWith("2")) {
+      return true;
+    }
+    throw new Error(`Unexpected response status: ${res?.status ?? "unknown"}`);
+  } catch (err) {
+    // Normalize axios interceptor shaped error or generic error
+    const message =
+      err?.message ||
+      err?.data?.message ||
+      "Failed to delete product due to network or server error";
+    throw new Error(message);
+  }
 }
