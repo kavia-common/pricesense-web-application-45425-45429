@@ -132,14 +132,25 @@ function App() {
     const ok = window.confirm(`Remove "${product.name}" from tracking?`);
     if (!ok) return;
 
+    // Derive product id robustly in case backend provides product_id instead of id
+    const pid = product?.id ?? product?.product_id ?? product?.ID ?? null;
+    if (pid == null) {
+      setToast({
+        type: "error",
+        message: "Cannot delete: product id is missing.",
+      });
+      setTimeout(() => setToast(null), 2500);
+      return;
+    }
+
     // optimistic UI update
     const prev = products;
-    setProducts((cur) => cur.filter((p) => p.id !== product.id));
-    if (selected?.id === product.id) {
+    setProducts((cur) => cur.filter((p) => (p?.id ?? p?.product_id) !== pid));
+    if ((selected?.id ?? selected?.product_id) === pid) {
       setSelected(null);
     }
     try {
-      await deleteProduct(product.id); // handle 204 or 200
+      await deleteProduct(pid); // handle 204 or 200
       setToast({ type: "success", message: "Product removed." });
     } catch (e) {
       // revert on failure
