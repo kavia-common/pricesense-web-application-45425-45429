@@ -12,6 +12,7 @@ import {
   fetchAlerts,
   addProduct,
   fetchPriceHistory,
+  deleteProduct,
 } from "./api/client";
 
 /**
@@ -33,14 +34,14 @@ function App() {
   const [addLoading, setAddLoading] = useState(false);
   const [addError, setAddError] = useState(null);
 
+  // transient user messages
+  const [toast, setToast] = useState(null);
+
   const [selected, setSelected] = useState(null);
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  const chartsEnabled = useMemo(
-    () => !!featureFlags?.charts,
-    []
-  );
+  const chartsEnabled = useMemo(() => !!featureFlags?.charts, []);
 
   const reloadProducts = async (q = "") => {
     setProdLoading(true);
@@ -112,10 +113,43 @@ function App() {
       await addProduct(form);
       await reloadProducts(query);
       setSelected(null);
+      setToast({ type: "success", message: "Product added." });
     } catch (e) {
       setAddError(e?.message || "Failed to add product");
+      setToast({
+        type: "error",
+        message: e?.message || "Failed to add product",
+      });
     } finally {
       setAddLoading(false);
+      // auto-clear toast after a short time
+      setTimeout(() => setToast(null), 2500);
+    }
+  };
+
+  const handleDelete = async (product) => {
+    if (!product) return;
+    const ok = window.confirm(`Remove "${product.name}" from tracking?`);
+    if (!ok) return;
+
+    // optimistic UI update
+    const prev = products;
+    setProducts((cur) => cur.filter((p) => p.id !== product.id));
+    if (selected?.id === product.id) {
+      setSelected(null);
+    }
+    try {
+      await deleteProduct(product.id); // expects 204
+      setToast({ type: "success", message: "Product removed." });
+    } catch (e) {
+      // revert on failure
+      setProducts(prev);
+      setToast({
+        type: "error",
+        message: e?.message || "Failed to remove product",
+      });
+    } finally {
+      setTimeout(() => setToast(null), 2500);
     }
   };
 
@@ -130,11 +164,22 @@ function App() {
 
       <main className="ps-layout">
         <div className="ps-main">
+          {toast && (
+            <div
+              className={`ps-state ${toast.type === "error" ? "ps-error" : ""}`}
+              role={toast.type === "error" ? "alert" : "status"}
+              aria-live="polite"
+              style={{ marginBottom: 8 }}
+            >
+              {toast.message}
+            </div>
+          )}
           <ProductList
             loading={prodLoading}
             error={prodError}
             products={products}
             onSelect={setSelected}
+            onDelete={handleDelete}
           />
           {chartsEnabled && (
             <ProductChart

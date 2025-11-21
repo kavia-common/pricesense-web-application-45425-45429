@@ -18,12 +18,14 @@ function percentChange(current, last) {
  * - error: string | null
  * - products: Array<{id,name,url,current_price,last_price}>
  * - onSelect(product): function invoked when a row is clicked
+ * - onDelete(product): function invoked when remove button is clicked
  */
 export default function ProductList({
   loading,
   error,
   products = [],
   onSelect,
+  onDelete,
 }) {
   return (
     <section className="ps-card">
@@ -49,6 +51,7 @@ export default function ProductList({
                   <th className="num">Current</th>
                   <th className="num">Last</th>
                   <th className="num">% Change</th>
+                  <th className="num" aria-label="actions" />
                 </tr>
               </thead>
               <tbody>
@@ -93,6 +96,20 @@ export default function ProductList({
                           : "—"}
                       </td>
                       <td className={`num ${changeClass}`}>{pctText}</td>
+                      <td className="num">
+                        <button
+                          className="ps-button"
+                          style={{ background: "transparent", color: "var(--error)", borderColor: "var(--error)" }}
+                          title={`Remove ${p.name}`}
+                          aria-label={`Remove ${p.name}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete?.(p);
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}

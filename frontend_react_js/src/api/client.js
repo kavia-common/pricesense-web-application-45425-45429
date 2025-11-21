@@ -116,3 +116,17 @@ export async function fetchPriceHistory(productId) {
   // Graceful handling: ensure array
   return Array.isArray(res.data) ? res.data : res.data?.items || [];
 }
+
+/**
+// PUBLIC_INTERFACE
+ * deleteProduct
+ * Delete a product by id. Expects backend to return 204 No Content.
+ */
+export async function deleteProduct(productId) {
+  if (productId == null) {
+    throw new Error("productId is required");
+  }
+  // Expect 204 No Content; no body parsing
+  await api.delete(`/products/${productId}`);
+  return true;
+}
