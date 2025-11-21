@@ -2,12 +2,16 @@ import axios from "axios";
 
 /**
  * Determine API base URL from env with fallback.
+ * Uses REACT_APP_API_BASE to allow deployment-time configuration.
+ * Example: http://localhost:3001 or https://api.pricesense.app
  */
 const API_BASE =
-  process.env.REACT_APP_API_BASE?.trim() || "http://localhost:3001";
+  (process.env.REACT_APP_API_BASE && process.env.REACT_APP_API_BASE.trim()) ||
+  "http://localhost:3001";
 
 /**
  * Feature flags parsing with safe defaults.
+ * Set REACT_APP_FEATURE_FLAGS='{"charts":true}'
  */
 function parseFeatureFlags() {
   try {
@@ -57,16 +61,23 @@ const api = createApiClient();
 
 /**
  * HEALTHCHECK
+ * Uses REACT_APP_HEALTHCHECK_PATH to support custom health route; defaults to "/".
  */
 // PUBLIC_INTERFACE
 export async function healthcheck() {
-  const path = process.env.REACT_APP_HEALTHCHECK_PATH || "/";
+  const path =
+    (process.env.REACT_APP_HEALTHCHECK_PATH &&
+      process.env.REACT_APP_HEALTHCHECK_PATH.trim()) ||
+    "/";
   const res = await api.get(path);
   return res.data;
 }
 
 /**
  * PRODUCTS
+ * Aligned to backend routes:
+ * - GET /products
+ * - POST /products
  */
 // PUBLIC_INTERFACE
 export async function fetchProducts(query = "") {
@@ -84,6 +95,7 @@ export async function addProduct(payload) {
 
 /**
  * ALERTS
+ * Aligned to backend route: GET /alerts
  */
 // PUBLIC_INTERFACE
 export async function fetchAlerts() {
@@ -93,9 +105,14 @@ export async function fetchAlerts() {
 
 /**
  * PRICE HISTORY
+ * Aligned to backend route: GET /products/{product_id}/history
  */
 // PUBLIC_INTERFACE
 export async function fetchPriceHistory(productId) {
+  if (productId == null) {
+    return [];
+  }
   const res = await api.get(`/products/${productId}/history`);
-  return res.data;
+  // Graceful handling: ensure array
+  return Array.isArray(res.data) ? res.data : res.data?.items || [];
 }

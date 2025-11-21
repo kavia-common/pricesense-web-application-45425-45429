@@ -69,16 +69,22 @@ function App() {
   };
 
   const loadHistory = async (product) => {
-    if (!product) return;
+    if (!product) {
+      setHistory([]);
+      return;
+    }
     setHistoryLoading(true);
     try {
       const data = await fetchPriceHistory(product.id);
       const list = Array.isArray(data) ? data : data?.items || [];
       // Normalize fields to { timestamp, price }
-      const norm = list.map((h) => ({
-        timestamp: h.timestamp || h.created_at || h.time || h.ts,
-        price: Number(h.price ?? h.value ?? 0),
-      }));
+      const norm = list
+        .filter((h) => h != null)
+        .map((h) => ({
+          timestamp: h.timestamp || h.created_at || h.time || h.ts,
+          price: Number(h.price ?? h.value ?? 0),
+        }))
+        .filter((h) => h.timestamp && !Number.isNaN(h.price));
       setHistory(norm);
     } catch (e) {
       setHistory([]);

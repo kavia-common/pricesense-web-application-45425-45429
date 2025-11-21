@@ -1,82 +1,54 @@
-# Lightweight React Template for KAVIA
+# PriceSense Frontend (React)
 
-This project provides a minimal React template with a clean, modern UI and minimal dependencies.
+Minimal React UI to track products, view price history, and see alerts.
 
-## Features
+## API Integration
 
-- **Lightweight**: No heavy UI frameworks - uses only vanilla CSS and React
-- **Modern UI**: Clean, responsive design with KAVIA brand styling
-- **Fast**: Minimal dependencies for quick loading times
-- **Simple**: Easy to understand and modify
+The app talks to the backend using environment-configured base URL and paths aligned with the backend OpenAPI:
+
+- GET /products
+- POST /products
+- GET /alerts
+- GET /products/{product_id}/history
+- Health: GET /
+
+Configure the base URL with REACT_APP_API_BASE. The health path can be overridden by REACT_APP_HEALTHCHECK_PATH (defaults to "/").
+
+Example .env (do not commit):
+
+```
+REACT_APP_API_BASE=http://localhost:3001
+REACT_APP_HEALTHCHECK_PATH=/
+REACT_APP_FEATURE_FLAGS={"charts":true}
+```
 
 ## Getting Started
 
-In the project directory, you can run:
+Install and run:
 
-### `npm start`
+- npm install
+- npm start
 
-Runs the app in development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Open http://localhost:3000.
 
-### `npm test`
+## Scripts
 
-Launches the test runner in interactive watch mode.
+- npm start – Dev server
+- npm test – Tests
+- npm run build – Production build
 
-### `npm run build`
+## Notes on Empty States
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The UI gracefully handles:
+- No products: shows “No products yet. Add your first one!”
+- No alerts: shows “No alerts at the moment.”
+- No history: chart shows “No price history yet.”
+- Backend unreachable: navbar health indicator turns red; list and alerts show error messages.
 
-## Customization
+## Styling
 
-### Colors
-
-The main brand colors are defined as CSS variables in `src/App.css`:
-
-```css
-:root {
-  --kavia-orange: #E87A41;
-  --kavia-dark: #1A1A1A;
-  --text-color: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --border-color: rgba(255, 255, 255, 0.1);
-}
-```
-
-### Components
-
-This template uses pure HTML/CSS components instead of a UI framework. You can find component styles in `src/App.css`. 
-
-Common components include:
-- Buttons (`.btn`, `.btn-large`)
-- Container (`.container`)
-- Navigation (`.navbar`)
-- Typography (`.title`, `.subtitle`, `.description`)
+See src/App.css for minimalist theme variables and components.
 
 ## Learn More
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+React docs: https://react.dev
